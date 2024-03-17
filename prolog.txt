@@ -13,8 +13,13 @@ predicates
 clauses
 	/* Маршруты */
 	route([1], "Москва", "СПБ", 12, 16, "ПТ").
-	route([2], "Москва", "Курск", 12, 13, "ПТ").
-	route([3], "Курск"    , "СПБ" , 13, 14, "ПТ").
+	
+	route([2], "Москва", "СПБ", 10, 16, "ПТ").
+	
+	route([3], "Москва", "Курск", 12, 13, "ПТ").
+	route([4], "Курск"    , "СПБ" , 13, 14, "ПТ").
+	route([5], "Курск"    , "Рязань" , 13, 14, "ПТ").
+	route([6], "Рязань"    , "СПБ" , 14, 15, "ПТ").
 	
 	/*Объединение списков*/
 	conc([], L, L).
@@ -26,16 +31,26 @@ clauses
 	/*Находит маршруты*/
 	
 	%прямой маршрут
-	temp_route(City1, City2, Day, R, Time) :- 
-					route(R, City1, City2, _, _,  Day), 
-					route(R, City1, City2, T2, T1,  Day),
+	temp_route(Start, Dest, Day, R, Time) :- 
+					route(R, Start, Dest, T2, T1,  Day),
 					Time = ( T1 -  T2 ).
 	
 	% c 1 пересадкой
-	temp_route(City1, City2, Day, R, Time) :-  route(R1, City1, City3, T1, _, Day),  
-									  route(R2, City3, City2, _, T2, Day), 
-									  conc(R1, R2, R),
-									  Time = T2 - T1.
+	temp_route(Start, Dest, Day, R, Time) :-  route(R1, Start, City3, T1, T2, Day),  
+									 route(R2, City3, Dest, T3, T4, Day), 
+									 conc(R1, R2, R),
+									 T2 <= T3,
+									 Time = T4 - T1.
+									  
+	% c 2 пересадками
+	temp_route(Start, Dest, Day, R, Time) :-  route(R1, Start, City1, T1, T2, Day), 
+	 								 route(R2, City1, City2, T3, T4, Day), 
+									 route(R3, City2, Dest, T5, T6, Day), 
+									 conc(R1, R2, R_temp),
+									 conc(R_temp, R3, R),
+									 T2 <= T3, T4 <= T5,
+									 Time = T6 - T1.
+									 
 	
 	
 	
