@@ -10,10 +10,11 @@ predicates
 	nondeterm conc(lists, lists, lists)
 	
 	nondeterm temp_route(city, city, day, lists, time)
+	
+	nondeterm min(lists, integer)
 clauses
 	/* Маршруты */
 	route([1], "Москва", "СПБ", 12, 16, "ПТ").
-	
 	route([2], "Москва", "СПБ", 10, 16, "ПТ").
 	
 	route([3], "Москва", "Курск", 12, 13, "ПТ").
@@ -21,11 +22,24 @@ clauses
 	route([5], "Курск"    , "Рязань" , 13, 14, "ПТ").
 	route([6], "Рязань"    , "СПБ" , 14, 15, "ПТ").
 	
+	route([7], "Москва"    , "Казань" , 9, 15, "ПТ").
+	route([8], "Москва"    , "Уфа" , 15, 18, "ПТ").
+	route([9], "Казань"    , "Уфа" , 15, 18, "ПТ").
+	route([10], "Уфа"    , "Челябинск" , 19, 20, "ПТ").
+	route([11], "Екатеринбург"    , "Пермь" , 3, 7, "ПТ").
+	route([12], "Пермь"    , "Архангельск" , 7, 23, "ПТ").
+	
 	/*Объединение списков*/
 	conc([], L, L).
 	conc([H|T], L, [H|T1]) :- conc(T, L, T1).
+	
+	/*Находит минимум в списке*/
+	min([Head|Tail], Result) :- min(Tail, Result), Result < Head, !.
+	min([Head|_], Head).
 
 	
+	%min_route(City1, City2, Day, R, Time) :- findall(N, temp_route(City1, City2, Day, _, N), L), min(L, Time), temp_route(City1, City2, Day, R, Time).
+
 	min_route(City1, City2, Day, R, Time) :- temp_route(City1, City2, Day, R, Time).
 
 	/*Находит маршруты*/
@@ -51,7 +65,6 @@ clauses
 									 T2 <= T3, T4 <= T5,
 									 Time = T6 - T1.
 									 
-	
 	
 	
 	
