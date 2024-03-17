@@ -1,36 +1,44 @@
 domains
 	lists = integer*
+	day, city = symbol
+	time = integer
 predicates
-	nondeterm route(lists, symbol, symbol, integer, integer, symbol)
+	nondeterm route(lists, city, city, time, time, day)
 	
-	nondeterm min_route(symbol, symbol, symbol, lists)
+	nondeterm min_route(city, city, day, lists, time)
 	
 	nondeterm conc(lists, lists, lists)
 	
-	nondeterm temp_route(symbol, symbol, symbol, lists)
+	nondeterm temp_route(city, city, day, lists, time)
 clauses
 	/* Маршруты */
 	route([1], "Москва", "СПБ", 12, 16, "ПТ").
 	route([2], "Москва", "Курск", 12, 13, "ПТ").
 	route([3], "Курск"    , "СПБ" , 13, 14, "ПТ").
 	
+	/*Объединение списков*/
 	conc([], L, L).
 	conc([H|T], L, [H|T1]) :- conc(T, L, T1).
 
-	/**/
-	min_route(City1, City2, Day, R) :- temp_route(City1, City2, Day, R).
-	%min_route(City1, City2, Day, R) :- route(R, City1, City2, _, _,  Day).
+	
+	min_route(City1, City2, Day, R, Time) :- temp_route(City1, City2, Day, R, Time).
 
 	/*Находит маршруты*/
-	%all_route(City1, City2, Day, Routes) :-   conc(route(R1, City1, _, _, _,  Day), route(R2, _, City2, _, _,  Day), R).
-	%находит прямой маршрут
-	temp_route(City1, City2, Day, R) :- route(R, City1, City2, _, _,  Day) .
+	
+	%прямой маршрут
+	temp_route(City1, City2, Day, R, Time) :- 
+					route(R, City1, City2, _, _,  Day), 
+					route(R, City1, City2, T2, T1,  Day),
+					Time = ( T1 -  T2 ).
 	
 	% c 1 пересадкой
-	temp_route(City1, City2, Day, R) :-  route(R1, City1, City3, _, _, Day),  route(R2, City3, City2, _, _, Day), conc(R1, R2, R).
+	temp_route(City1, City2, Day, R, Time) :-  route(R1, City1, City3, T1, _, Day),  
+									  route(R2, City3, City2, _, T2, Day), 
+									  conc(R1, R2, R),
+									  Time = T2 - T1.
 	
 	
 	
 	
 goal
-	min_route("Москва", "СПБ", "ПТ", R).
+	min_route("Москва", "СПБ", "ПТ", R, Time).
