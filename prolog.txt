@@ -1,0 +1,36 @@
+domains
+	lists = integer*
+predicates
+	nondeterm route(lists, symbol, symbol, integer, integer, symbol)
+	
+	nondeterm min_route(symbol, symbol, symbol, lists)
+	
+	nondeterm conc(lists, lists, lists)
+	
+	nondeterm temp_route(symbol, symbol, symbol, lists)
+clauses
+	/* Маршруты */
+	route([1], "Москва", "СПБ", 12, 16, "ПТ").
+	route([2], "Москва", "Курск", 12, 13, "ПТ").
+	route([3], "Курск"    , "СПБ" , 13, 14, "ПТ").
+	
+	conc([], L, L).
+	conc([H|T], L, [H|T1]) :- conc(T, L, T1).
+
+	/**/
+	min_route(City1, City2, Day, R) :- temp_route(City1, City2, Day, R).
+	%min_route(City1, City2, Day, R) :- route(R, City1, City2, _, _,  Day).
+
+	/*Находит маршруты*/
+	%all_route(City1, City2, Day, Routes) :-   conc(route(R1, City1, _, _, _,  Day), route(R2, _, City2, _, _,  Day), R).
+	%находит прямой маршрут
+	temp_route(City1, City2, Day, R) :- route(R, City1, City2, _, _,  Day) .
+	
+	% c 1 пересадкой
+	temp_route(City1, City2, Day, R) :-  route(R1, City1, City3, _, _, Day),  route(R2, City3, City2, _, _, Day), conc(R1, R2, R).
+	
+	
+	
+	
+goal
+	min_route("Москва", "СПБ", "ПТ", R).
